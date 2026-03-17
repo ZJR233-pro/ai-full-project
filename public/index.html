@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 创作满血版</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+        body{background:linear-gradient(135deg,#4f46e5,#7c3aed);min-height:100vh;padding:20px}
+        .box{max-width:800px;margin:40px auto;background:white;border-radius:20px;padding:50px;box-shadow:0 25px 50px rgba(0,0,0,0.2)}
+        .title{font-size:36px;font-weight:800;text-align:center;margin-bottom:10px}
+        .sub{text-align:center;color:#666;margin-bottom:40px}
+        .upload{border:2px dashed #ccc;border-radius:16px;padding:40px;text-align:center;cursor:pointer;background:#f9f9f9;margin-bottom:25px}
+        #file{display:none}
+        #preview{max-width:220px;border-radius:12px;margin-top:15px;display:none}
+        textarea{width:100%;padding:18px;border-radius:14px;border:1px solid #ddd;font-size:16px;min-height:100px;outline:none}
+        .btns{display:flex;gap:14px;margin-bottom:30px}
+        button{flex:1;padding:18px;border-radius:14px;border:none;background:linear-gradient(90deg,#4f46e5,#7c3aed);color:white;font-size:16px;font-weight:600;cursor:pointer}
+        .result{background:#f7f7f7;border-radius:16px;padding:30px;text-align:center;min-height:150px}
+        .result img,.result video{max-width:100%;border-radius:12px}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="title">✨ AI 创作满血版</div>
+        <div class="sub">参考图生图 · 文生图 · 图生视频</div>
+        <div class="upload" onclick="document.getElementById('file').click()">
+            📸 点击上传参考图片
+            <input type="file" id="file" accept="image/*" onchange="pre(event)">
+            <img id="preview">
+        </div>
+        <label>📝 提示词</label>
+        <textarea id="prompt" placeholder="描述你想要的画面"></textarea>
+        <div class="btns">
+            <button onclick="genImg()">🖼️ 生成图片</button>
+            <button onclick="genVideo()">🎥 生成视频</button>
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        let img=null;const api="/api";
+        function pre(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{img=ev.target.result;preview.src=img;preview.style.display="block"};r.readAsDataURL(f)}
+        async function genImg(){const p=prompt.value;result.innerHTML="⏳ 生成中...";try{const res=await fetch(api+"/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:p,refImage:img})});const d=await res.json();result.innerHTML=`<img src="${d.url}">`}catch(e){result.innerHTML="❌ 失败："+e.message}}
+        async function genVideo(){result.innerHTML="⏳ 视频生成中...";try{const res=await fetch(api+"/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refImage:img})});const d=await res.json();result.innerHTML=`<video src="${d.url}" controls autoplay>`}catch(e){result.innerHTML="❌ 失败："+e.message}}
+    </script>
+</body>
+</html>
